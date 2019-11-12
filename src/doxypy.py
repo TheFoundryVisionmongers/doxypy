@@ -74,7 +74,7 @@ class FSM(object):
 		
 	def makeTransition(self, input):
 		"""Makes a transition based on the given input.
-		
+
 		@param	input	input to parse by the FSM
 		"""
 		for transition in self.transitions:
@@ -86,7 +86,7 @@ class FSM(object):
 					self.current_input = input
 					self.current_transition = transition
 					if options.debug:
-						print >>sys.stderr, "# FSM: executing (%s -> %s) for line '%s'" % (from_state, to_state, input)
+						sys.stderr.write("# FSM: executing (%s -> %s) for line '%s'" % (from_state, to_state, input))
 					callback(match)
 					return
 
@@ -168,7 +168,6 @@ class Doxypy(object):
 		]
 		
 		self.fsm = FSM("FILEHEAD", transitions)
-		self.outstream = sys.stdout
 		
 		self.output = []
 		self.comment = []
@@ -208,9 +207,8 @@ class Doxypy(object):
 		if self.output:
 			try:
 				if options.debug:
-					print >>sys.stderr, "# OUTPUT: ", self.output
-				print >>self.outstream, "\n".join(self.output)
-				self.outstream.flush()
+					sys.stderr.write("# OUTPUT: ", self.output)
+				print("\n".join(self.output))
 			except IOError:
 				# Fix for FS#33. Catches "broken pipe" when doxygen closes 
 				# stdout prematurely upon usage of INPUT_FILTER, INLINE_SOURCES 
@@ -228,7 +226,7 @@ class Doxypy(object):
 		Closes the current commentblock and starts a new comment search.
 		"""
 		if options.debug:
-			print >>sys.stderr, "# CALLBACK: resetCommentSearch" 
+			sys.stderr.write("# CALLBACK: resetCommentSearch")
 		self.__closeComment()
 		self.startCommentSearch(match)
 	
@@ -239,7 +237,7 @@ class Doxypy(object):
 		the current indentation.
 		"""
 		if options.debug:
-			print >>sys.stderr, "# CALLBACK: startCommentSearch"
+			sys.stderr.write(sys.stderr, "# CALLBACK: startCommentSearch")
 		self.defclass = [self.fsm.current_input]
 		self.comment = []
 		self.indent = match.group(1)
@@ -251,7 +249,7 @@ class Doxypy(object):
 		appends the current line to the output.
 		"""
 		if options.debug:
-			print >>sys.stderr, "# CALLBACK: stopCommentSearch" 
+			sys.stderr.write("# CALLBACK: stopCommentSearch")
 		self.__closeComment()
 		
 		self.defclass = []
@@ -263,7 +261,7 @@ class Doxypy(object):
 		Closes the open comment	block, resets it and appends the current line.
 		""" 
 		if options.debug:
-			print >>sys.stderr, "# CALLBACK: appendFileheadLine" 
+			sys.stderr.write("# CALLBACK: appendFileheadLine")
 		self.__closeComment()
 		self.comment = []
 		self.output.append(self.fsm.current_input)
@@ -275,7 +273,7 @@ class Doxypy(object):
 		well as singleline comments.
 		"""
 		if options.debug:
-			print >>sys.stderr, "# CALLBACK: appendCommentLine" 
+			sys.stderr.write("# CALLBACK: appendCommentLine")
 		(from_state, to_state, condition, callback) = self.fsm.current_transition
 		
 		# single line comment
@@ -312,13 +310,13 @@ class Doxypy(object):
 	def appendNormalLine(self, match):
 		"""Appends a line to the output."""
 		if options.debug:
-			print >>sys.stderr, "# CALLBACK: appendNormalLine" 
+			sys.stderr.write("# CALLBACK: appendNormalLine")
 		self.output.append(self.fsm.current_input)
 		
 	def appendDefclassLine(self, match):
 		"""Appends a line to the triggering block."""
 		if options.debug:
-			print >>sys.stderr, "# CALLBACK: appendDefclassLine" 
+			sys.stderr.write("# CALLBACK: appendDefclassLine")
 		self.defclass.append(self.fsm.current_input)
 	
 	def makeCommentBlock(self):
@@ -397,7 +395,7 @@ def optParse():
 	(options, filename) = parser.parse_args()
 	
 	if not filename:
-		print >>sys.stderr, "No filename given."
+		sys.stderr.write("No filename given.")
 		sys.exit(-1)
 	
 	return filename[0]
